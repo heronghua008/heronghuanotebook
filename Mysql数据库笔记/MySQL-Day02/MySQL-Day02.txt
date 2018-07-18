@@ -1,0 +1,369 @@
+MySQL-Day01回顾
+1、MySQL特点
+	1、关系型数据库
+	2、跨平台
+	3、支持多种编程语言
+2、MySQL启动连接
+	1、服务端启动
+		sudo /etc/init.d/mysql start | stop | restart | reload
+	2、客户端连接
+		mysql -h主机地址 -u用户名 -p密码
+	3、注意
+		1、MySQL中数据是以文件的形式存储在数据库目录/var/lib/mysql
+		2、关系型数据库的核心内容是关系 即 二维表
+3、基本SQL命令
+	1、库的管理
+		1、创建:create database 库名 character set utf8;
+		2、查看:show create database 库名;
+		3、所在库:select database();
+		4、切换库:use 库名;
+		5、查看表:show tables;
+		6、删除库:drop database 库名;
+	2、表的管理
+		1、创建: create table 表名(字段名 数据类型,...)char....
+		2、查看字符集和存储引擎: show create table 表名;
+		3、查看表结构: desc 表名;
+		4、删除表: drop table 表名;
+	3、表记录管理
+		1、插入记录
+			insert into 表名(..,..,..) values(),(),(),...;
+		2、查询记录
+			select 字段名1,字段名2 from 表名 where 条件;
+	4、更改库的默认字符集
+		1、sudo -i
+		2、cd /etc/mysql/mysql.conf.d/
+		3、cp mysqld.cnf mysqld.cnf.bak
+		4、vi mysqld.cnf
+			[mysqld]
+			character_set_server=utf8
+		5、/etc/init.d/mysql restart
+		6、exit
+	5、数据类型
+		1、数值类型
+			1、整型
+				1、int
+				2、tinyint unsigned
+			2、浮点型
+				1、float(m,n) 
+				2、decimal(m,n)
+					decimal(20,2)
+						整数部分：18/9=商2余0 4字节
+						小数部分：2/9=商0余2  1字节
+						占5个字节的存储空间
+		2、字符类型
+			1、char(定长,浪费存储空间,性能高)
+			2、varchar(变长,节省存储空间,性能低)
+			3、text  |  longtext
+			4、字符宽度、数值类型宽度
+				1、数值宽度 ：显示宽度,和存储无关,用zerofill
+				2、字符宽度 ：和存储相关,超过指定宽度则无法存储
+		3、枚举类型
+			1、单选 enum(...)
+			2、多选 set(...)  ## "值1,值2,值3,..."
+		4、日期时间类型
+	6、表字段的操作
+		1、添加add
+			alter table 表名 add 字段名 数据类型 first|after 字段名
+		2、修改modify
+			alter table 表名 modify 字段名 新数据类型;
+		3、删除drop
+			alter table 表名 drop 字段名;
+MySQL-Day02笔记
+1、数据类型
+	1、数值类型
+	2、字符类型
+	3、枚举类型
+	4、日期时间类型
+		1、date ：日期 "YYYY-MM-DD"
+		2、time ：时间 "HH:MM:SS"
+		3、datetime ：日期时间 "YYYY-MM-DD HH:MM:SS"
+		4、timestamp ：日期时间 "YYYY-MM-DD HH:MM:SS"
+		5、注意
+			1、datetime ：不给值默认返回NULL
+			2、timestamp ：不给值默认返回系统当前时间
+2、日期时间函数
+	1、NOW() 返回服务器当前时间
+	2、CURDATE() 返回当前日期 
+	3、CURTIME() 返回当前时间
+		insert into t1 values
+		(2,"吕老师",25,CURDATE(),CURTIME(),NOW());
+	4、日期时间运算
+		1、语法格式
+			select ... from 表名 
+			where 字段名 运算符 (时间 - interval 时间间隔单位);
+			时间间隔单位：
+				1 day | 2 hour | 1 minute | 1 year | 3 month
+
+			where id>8
+			where meeting > (now() - interval 1 day);
+											现在时间 - 1天的时间 = 1天前的时间点
+		2、练习
+			1、查询1天以内的记录
+				select * from t1 where meeting>(now()-interval 1 day);
+			2、查询1年以前的记录
+				select * from t1 
+				where meeting<(now()-interval 1 year);
+			3、查询1天以前,3天以内的记录
+				select * from t1 where
+				meeting<(now()-interval 1 day) and
+				meeting>(now()-interval 3 day);
+	5、练习
+		1、创建库 studb2
+			create database studb2;
+		2、在库中创建表 stuinfo,字段有3个：
+			name、age、phone char(11)
+			use studb2;
+			create table stuinfo(
+			name varchar(20),
+			age tinyint unsigned,
+			phone char(11)
+			);
+		3、查看表结构
+			desc stuinfo;
+		4、在表中第一列添加一个 id 字段
+			alter table stuinfo add id int first;
+		5、把 phone 的数据类型改为 bigint
+			alter table stuinfo modify phone bigint;
+		6、在表中最后一列添加一个字段：注册时间 register ,数据类型为：timestamp
+			alter table stuinfo add register timestamp;
+		7、在表中 id name age phone 四个字段插入1条记录
+			insert into stuinfo(id,name,age,phone) values(1,"关羽",23,1363638438);
+		8、查询5分钟内的注册信息
+			select * from stuinfo where register>(now()-interval 5 minute);
+		#####修改字段名######
+		alter table 表名 change 原字段名 新字段名 数据类型;
+4、表记录管理
+	1、删除表记录(delete)
+		1、delete from 表名 where 条件;
+		2、注意
+			delete语句后没有加where条件,表中所有记录全部清除
+	2、更新表记录(update)
+		1、update 表名 set 字段1=值1,字段2=值2,... where 条件;
+		2、注意
+			必须加where条件
+	3、练习
+		1、查找所有蜀国人信息
+			select * from hero where country="蜀国";
+		2、把id为2的英雄名字改为司马懿,国家改为魏国
+			update hero set name="司马懿",country="魏国" where id=2;
+		3、查找女英雄的姓名、性别和国家
+			select name,sex,country from hero where sex="女";
+		4、删除所有魏国的英雄
+			delete from hero where country="魏国";
+		5、查找所有蜀国男英雄的信息
+			select * from hero where country="蜀国" and sex="男";
+		6、删除所有的英雄
+			delete from hero;
+5、运算符操作(查询、修改、删除)	
+	1、数值比较&字符比较&逻辑比较
+		数值：= 、!= 、> 、>= 、< 、<=
+		字符：= 、!=
+		逻辑：and 、or
+		2、练习
+			1、找出攻击力高于150的蜀国英雄的名字和攻击值
+				select name,gongji from sanguo where gongji>150 and country="蜀国";
+			2、将赵云的攻击力改为666,防御力改为88
+				update sanguo set gongji=666,fangyu=88 where name="赵云666";
+			3、查找蜀国和魏国的英雄信息
+				select * from sanguo where country="蜀国" or country="魏国";
+			4、将吴国英雄中攻击值为110的英雄的攻击值设置为100,防御力设置为60
+				update sanguo set gongji=100,fangyu=60 where country="吴国" and gongji=110;
+	2、范围内比较
+		1、运算符
+			between 值1 and 值2 
+			in(值1,值2,...)
+			not in(值1,值2,...)
+		2、示例
+			1、查找攻击值在100到200之间的蜀国英雄信息
+				select * from sanguo where gongji between 100 and 200 and country="蜀国";
+			2、找到蜀国和吴国以外的国家的女英雄信息
+				select * from sanguo 
+				where country not in("蜀国","吴国") and sex="女";
+	3、匹配空、非空
+		1、空 ：is null
+		2、非空 ：is not null
+		3、示例
+			1、查找姓名为NULL的蜀国男英雄信息
+				select * from sanguo
+				where name is null and country="蜀国" or sex="男";
+			2、查找姓名为 "" 的英雄的id、姓名和国家
+				select id,name,country from sanguo where name="";
+			3、注意
+				1、NULL ：空值,必须用 is 或者 is not 去匹配
+				2、""   ：空字符串,只能用 = 或者 != 去匹配
+	4、模糊比较
+		1、where 字段名 like 表达式
+		2、表达式
+			1、_ ：匹配单个字符
+			2、% ：匹配0到多个字符
+		3、示例
+			1、名字中至少有2个字符的记录
+				select * from sanguo where name like "_%_";
+			2、匹配名字为非空NULL的记录
+				select * from sanguo where name like "%";
+			3、匹配名字中只有三个字符的记录
+				select * from sanguo where name like "___";
+			4、匹配姓赵的记录
+				select * from sanguo where name like "赵%";
+6、SQL查询
+	1、总结
+		3、select ...聚合函数 from 表名
+		1、where ...
+		2、group by ...
+		4、having ...
+		5、order by ...
+		6、limit ...;
+	2、order by
+		1、给查询的结果进行排序
+		2、order by 字段名 排序方式
+		3、排序方式
+			1、升序 ：ASC(默认)
+			2、降序 ：DESC
+		4、练习
+			1、将蜀国的英雄按照攻击值从高到低排序
+				select * from sanguo 
+				where country="蜀国" order by gongji DESC;
+			2、将魏蜀两国的男英雄中名字为三个字符的英雄按防御值升序排列
+				select * from sanguo 
+				where country in("蜀国","魏国") and sex="男" and name like "___" 
+				order by fangyu ASC;
+	3、limit(永远放在SQL语句的最后)
+		1、作用 ：限制显示查询记录的个数
+		2、用法
+			1、limit n -->显示n条记录
+			2、limit m,n
+				m ：表示从 m+1 条记录开始显示
+				n ：表示显示 n 条
+				limit 2,4 ：显示第3、4、5、6四条记录
+				limit 0,2 ：显示第1、2两条记录
+		3、示例
+			1、在蜀国英雄中查找攻击值前三名且名字不为NULL的英雄姓名、攻击值和国家
+				select name,gongji,country from sanguo
+				where
+				country="蜀国" and name is not NULL
+				order by gongji DESC
+				limit 3;
+			2、在蜀国英雄中,查找防御值倒数第2名至倒数第4名的英雄信息
+				select * from sanguo 
+				where country="蜀国" order by fangyu limit 1,3;
+		4、分页
+			每页显示5(n)条记录,显示第4(m)页
+			
+			第1页：limit 0,5  ## 1 2 3 4 5
+			第2页：limit 5,5  ## 6 7 8 9 10    ## (2-1)*5
+			第3页：limit 10,5 ## 11 12 13 14 15  ##(3-1)*5
+			第4页：limit 15,5 ## 16 17 18 19 20  ##(4-1)*5
+			
+			分页公式：limit (m-1)*n,n  m:第几页 n:每页显示记录条数
+	4、聚合函数
+		1、分类
+			avg(字段名) : 平均值
+			max(字段名) : 最大值
+			min(字段名) : 最小值
+			sum(字段名) : 求和
+			count(字段名) : 统计该字段记录的个数
+		2、示例
+			1、攻击力最强值
+				select max(gongji) as zq from sanguo;
+			2、统计一下表中id、name字段分别有多少条记录
+				select count(id),count(name) from sanguo;
+				## 空值NULL不会被统计
+				select count(*) from sanguo;
+	5、group by
+		1、作用 ：给查询的结果进行分组
+		2、示例
+			1、计算所有国家的平均攻击力,显示国家名和平均攻击力
+				select country,avg(gongji) from sanguo 
+				group by country; 
+
+				先分组-再聚合-去重
+				蜀国    
+				蜀国    400   蜀国
+				蜀国
+				魏国    300   魏国
+				魏国
+				吴国    200   吴国
+			2、查找所有国家中,英雄数量最多的前2名,显示国家名称和英雄数量
+				select country,count(*) as number from sanguo
+				group by country 
+				order by number DESC limit 2;
+		3、注意
+			1、group by之后的字段名必须要为select之后的字段名
+			2、如果select后的字段名和group by之后的字段不一致,则必须对该字段进行聚合处理(聚合函数)
+	6、having
+		1、作用 ：对查询结果进一步筛选
+		2、示例
+			1、找出平均攻击力大于105的国家的前2名,显示国家名称和平均攻击力
+				select country,avg(gongji) from sanguo
+				group by country
+				having avg(gongji)>105
+				order by avg(gongji) DESC limit 2;
+		3、注意
+			1、having语句通常和group by语句联合使用,过滤由group by语句返回的记录集
+			2、where只能操作表中实际存在的字段,having操作由聚合函数生成的显示列
+	7、distinct
+		1、作用 ：不显示字段的重复值
+		2、示例
+			1、sanguo表中有哪些国家
+				select distinct country from sanguo;
+			2、计算魏国一共有多少个英雄
+				select count(distinct name) from sanguo 
+				where country="魏国";
+		3、注意
+			1、处理distinct和from之间的所有字段,所有字段值必须全部相同才可以去重
+7、约束
+	1、作用
+		保证数据完整性、一致性、有效性的规则
+	2、约束分类
+		1、默认约束(default)
+			1、插入记录时,如果不给该字段赋值,则使用默认值
+			2、字段名 数据类型 default 默认值,
+		2、非空约束(not null)
+			1、不允许该字段值有NULL记录
+			2、字段名 数据类型 not null default 值,
+8、索引
+	1、索引优缺点
+		1、优点
+			加快数据的检索速度
+		2、缺点
+			1、当对表中数据进行增加、修改、删除时,索引需要动态维护,降低了数据的维护速度
+			2、索引需要占用物理存储空间
+	
+
+
+
+
+
+	
+			
+
+
+			
+				
+
+
+
+
+
+		
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

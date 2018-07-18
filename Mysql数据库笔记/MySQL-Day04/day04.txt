@@ -1,0 +1,319 @@
+MySQL-Day03回顾
+1、索引
+  1、普通索引(MUL)、唯一索引(UNI,字段值不重复,可为NULL)
+    1、创建
+      index(字段名),index(字段名)
+      unique(字段名),unique(字段名)
+      create [unique] index 索引名 on 表名;
+    2、查看
+      desc 表名;
+      show index from 表名;
+    3、删除
+      drop index 索引名 on 表名;
+  2、主键、自增长(PRI,不能重复,不为NULL,只有1个字段)
+    1、创建表 ：id int primary key auto_increment
+    2、已有表 ：alter table 表名 add primary key(字段名);
+    3、删除
+      1、alter table 表名 modify id int;
+      2、alter table 表名 drop primary key;
+2、数据导入
+  1、查看搜索路径 ：show varibles like "secure_file_priv";
+  2、复制文件 ：sudo cp 文件名 搜索路径
+  3、修改权限 ：chmod 权限 文件名
+  4、创建表
+  5、数据导入
+3、数据导出
+  1、查看搜索路径
+  2、导出命令
+4、表复制
+  1、create table 表名 select ... from 表名 where false;
+5、嵌套查询(子查询)
+  1、把内层的查询结果作为外层查询的条件
+6、多表查询
+  1、不加where条件
+    笛卡尔积：第一张表的所有记录和第二张表第一条记录去匹配...
+7、连接查询
+  内连接(inner join ... on) : 只显示匹配到的记录
+  左连接(left join ... on) : 以左表为主显示查询结果
+  右连接(right join ... on): 以右表为主显示查询结果
+MySQL-Day04笔记
+1、外键(foreign key)
+  1、定义 ：当前表字段值从另一个表范围内选择
+  2、语法格式
+    foreign key(参考字段名)
+    references 主表(被参考字段名)
+    on delete 级联动作
+    on update 级联动作
+  3、使用规则
+    1、主表、从表 字段数据类型要一致
+    2、主表被参考字段 ：主键
+  4、示例
+    表1、缴费信息表(财务)
+        学号  姓名     班级    金额
+	  1   唐伯虎  AID1805  300
+	  2   点秋香  AID1805  200
+
+    表2、学生信息表(班主任)
+        学号  姓名    金额
+	
+    表1、jftab
+      create table jftab(
+      id int primary key,
+      name varchar(20),
+      class char(7),
+      money int
+      )character set utf8;
+      insert into jftab values
+      (1,"唐伯虎","AID1805",300),
+      (2,"点秋香","AID1805",200);
+    表2、bjtab
+      create table bjtab(
+      stu_id int,
+      name varchar(20),
+      money int,
+      foreign key(stu_id) references jftab(id)
+      on delete cascade
+      on update cascade)character set utf8;
+      insert into bjtab values
+      (1,"唐伯虎",300),
+      (2,"点秋香",200);
+  5、删除外键
+    1、查看外键名 ：show create table 表名;
+    2、删除外键 ：alter table 表名 drop foreign key 外键名;
+  6、级联动作
+    1、cascade
+      数据级联删除、更新(参考字段)
+    2、restrict(默认)
+      从表有相关联记录,不允许主表操作
+    3、set null
+      主表更新,从表相关联记录字段值自动设置为 ：NULL
+  8、已有表添加外键
+    alter table 表名 add
+    foreign key(参考字段名) references 主表(被参考字段)
+    on delete ...
+    on update ...
+2、数据备份(mysqldump,在Linux终端中操作)
+  1、命令格式
+    mysqldump -u用户名 -p 源库名 > 路径/XXX.sql
+  2、源库名的表示方式
+    --all-databases   备份所有库
+    库名              备份单个库
+    -B 库1 库2 ...    备份多个库
+    库名 表1 表2 ...  备份指定表
+  3、练习
+    1、备份所有库为 all.sql , /home/tarena/mydata/
+      mysqldump -uroot -p --all-databases > all.sql
+    2、备份MOSHOU库中 sheng、city、xian三张表 MOSHOUscx.sql
+      mysqldump -uroot -p MOSHOU sheng city xian > MOSHOUscx.sql
+    3、备份2个库
+      mysqldump -uroot -p -B MOSHOU db4 > MSdb4.sql
+3、数据恢复
+  1、命令格式
+    mysql -u用户名 -p 目标库名 < xxx.sql
+    如何要恢复的库不存在则必须先创建空库
+  2、示例
+    1、恢复MOSHOU库,MOSHOU.sql
+      mysql -uroot -p MOSHOU < MOSHOU.sql
+    2、恢复MOSHOU库,all.sql
+      ## --one-database
+      mysql -uroot -p --one-database MOSHOU < all.sql
+    3、在MOSHOU库中：
+      1、新建一张表 t888 (id)
+      2、sheng表中新增一条记录 : 台湾
+    4、注意
+      1、恢复库时,原库中表中记录会被覆盖,新增的表不会删除
+4、事务和事务回滚
+  1、一件事从开始发生到结束的整个过程
+  2、作用 ：确保数据一致性
+  3、事务应用
+    1、开启事务
+      mysql> begin;
+      ## autocommit被禁用,SQL命令不会提交到数据库执行
+    2、终止事务
+      mysql> commit;  |  rollback;
+  4、注意
+    事务和事务回滚只针对表记录操作 ：增、删、改有效,对建库建表无效
+  5、案例
+    1、背景
+      你 ：建行卡
+      朋友 ：工商卡
+      你在建行取款机给你朋友转5000元
+    2、过程
+      表1、CCB
+        create table CCB(
+	name varchar(20),
+	money int
+	);
+	insert into CCB values("有钱人",10000);
+      表2、ICBC
+        create table ICBC(
+	name varchar(20),
+	money int
+	);
+	insert into ICBC values("没钱",0);
+    3、开始转账
+      mysql> begin;
+      mysql> update CCB set money=money-5000 where name="有钱人";
+      mysql> update ICBC set ;
+      mysql> rollback;
+6、MySQL存储引擎(处理表的处理器)
+  1、基本操作
+    1、查看所有存储引擎
+      show engines;
+    2、查看表存储引擎
+      show create table 表名;
+    3、指定存储引擎
+      create table 表名(...)engine=innodb,character set utf8;
+    4、修改表存储引擎
+      alter table 表名 engine=myisam;
+    5、工作中常用
+      InnoDB  MyISAM
+  2、修改表默认存储引擎
+    1、sudo -i
+    2、cd /etc/mysql/mysql.conf.d/
+    3、cp mysqld.cnf mysqld.cnf.bak
+    4、vi mysqld.cnf
+       [mysqld]
+       default-storage-engine=myisam
+    5、/etc/init.d/mysql restart
+7、锁
+  1、目的 ：解决客户端的并发访问的冲突问题
+  2、锁的分类
+    1、锁类型
+      读锁(select)共享锁 ：加读锁后其他用户只能查询,不能修改
+      写锁(增删改)互斥锁、排他锁 ：其他用户不能做任何操作
+    2、锁粒度
+      表级锁 ：加读锁或者写锁
+      行级锁 ：加读锁或者写锁
+8、存储引擎特点
+  1、MyISAM特点
+    1、独享表空间
+      表名.frm 表结构 
+      表名.myd 表记录
+      表名.myi 索引文件
+    2、支持表级锁
+  2、InnoDB特点
+    1、共享表空间
+      表名.frm 表结构和索引信息
+      表名.ibd 表记录
+    2、支持行级锁
+  3、memory
+    表结构存储在硬盘里,表记录存储在内存中
+    表名.frm
+    服务重启后表结构还在,表记录都消失
+  4、如何决定表使用什么存储引擎
+    1、主要用来查询的表用MyISAM
+    2、写操作多的表用InnoDB
+9、MySQL调优
+  1、选择合适的存储引擎
+  2、创建索引
+    在SELECT、WHERE、ORDER BY常涉及的字段建立索引
+  3、SQL语句优化
+    1、where条件判断尽量不使用 != ,否则放弃索引全表扫描
+    2、尽量避免NULL值判断,否则放弃索引全表扫描
+      优化前：select id from t1 where id is null;
+      优化后：在 id 字段上设置默认值0,确保id字段没有NULL值
+              select id from t1 where id=0;
+    3、尽量避免用 or 来连接条件,否则放弃索引全表扫描
+      优化前：select id from t1 where id=10 or id=20;
+      优化后：
+        select id from t1 where id=10
+	union all
+	select id from t1 where id=20;
+    4、模糊查询尽量避免使用前置%,否则放弃索引全表扫描
+      select name from t1 where name like "c%";
+    5、尽量避免使用in 和 not in,否则放弃索引全表扫描
+      优化前：select id from t1 where id in(1,2,3,4);
+      优化后：... where id between 1 and 4;
+    6、尽量避免使用 * ,用具体的字段代替*,不要返回用不到的任何字段
+10、与python交互
+  1、交互类型
+    python3 : pymysql  $ sudo pip3 install pymysql
+    python2 : MySQLdb  $ sudo pip install mysql-python
+  2、connect对象
+    1、创建与数据库连接的对象(调用connect()方法)
+      conn = pymysql.connect(参数列表)
+      参数列表：
+        1、host ：主机地址
+	2、port ：端口3306
+	3、db   ：数据库名
+	4、passwd：密码
+	5、charset：编码方式,推荐使用utf8
+	6、user ：用户名
+      示例：
+        conn = pymysql.connect(host="localhost",user="root",passwd="123456",db="db4",charset="utf8")
+    2、连接对象(conn)的方法
+      1、close() 关闭连接
+      2、commit() 提交到数据库执行
+      3、rollback() 回滚
+      4、cursor() 创建游标对象,用于执行sql语句
+    3、游标对象
+      1、作用 ：执行sql语句
+      2、示例 ：
+        cur = conn.cursor()
+        cur.execute("delete from sheng;")
+      3、常用方法
+        1、execute(SQL命令,[SQL语句补位元素]) 执行SQL命令
+	2、fetchone() 获取结果集第一条记录
+	3、fetchmany(n) 获取n条记录
+	4、fetchall() 获取所有记录    
+    5、pymysql使用流程
+      1、建立数据库连接 conn
+      2、创建游标对象 cur = conn.cursor()
+      3、cur.execute("...")
+      4、提交：conn.commit()
+      5、关闭游标：cur.close()
+      6、断开连接: conn.close()
+11、ER模型(Entry-Relationship)
+  1、定义
+    实体-关系模型,用于数据库设计
+  2、三个概念
+    1、实体 ：矩形框
+    2、属性 ：椭圆形
+    3、关系 ：实体之间的关系
+      1、一对一关系(1:1) ：老公对老婆
+      2、一对多关系(1:n) ：父亲对孩子
+      3、多对多关系(m:n) ：兄弟姐妹对兄弟姐妹
+    
+
+
+   
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

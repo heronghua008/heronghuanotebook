@@ -1,0 +1,338 @@
+MySQL-Day02回顾
+1、日期时间类型
+	1、date
+	2、time
+	3、datetime
+	4、timestamp
+2、日期时间函数
+	1、NOW()
+	2、CURDATE()
+	3、CURTIME()
+	4、日期时间运算
+		select ... from 表名 
+		where 字段名 运算符(时间 -interval 时间间隔单位);
+		时间间隔单位：hour 、day、month、year、minute ...
+3、表记录操作
+	1、删除 ：delete from 表名 where 条件;
+	2、更新 ：update 表名 set 字段名1=值1,... where 条件;
+4、运算符
+	1、数值、字符、逻辑比较
+	2、范围内比较
+		between 值1 and 值2
+		in(...)
+		not in(...)
+	3、空、非空
+		is null
+		is not null
+	4、模糊比较(字符)
+		字段名 like 表达式
+		_ : 单个 字符
+		% : 0到多个 字符
+5、SQL查询
+	1、order by 字段名 ASC/DESC
+	2、limit
+		1、limit n
+		2、limit m,n
+		3、分页：limit (m-1)*n,n  第 m 页的记录
+	3、聚合函数
+		avg(...) max(...) min(...) sum(...) 
+		count(...) #NULL值不会被统计
+	4、group by
+		select后字段名未在group by之后出现,必须对该字段聚合处理
+	5、having
+		group by ... having 聚合函数显示列 
+	6、distinct
+		seletct count(distinct 字段名1,字段名2,...) from 表名;
+	7、执行顺序
+		3、select ...聚合函数 from 表名 
+		1、where ...
+		2、group by ...
+		4、having ...
+		5、order by ...
+		6、limit ...
+6、约束
+	1、默认约束(default)
+	2、非空约束(not null)
+		sex enum("M","F","S") not null default "S",
+MySQL-Day03笔记
+1、索引
+	1、BTREE
+	2、优点 ：加快数据的检索速度
+	3、缺点
+		1、需动态维护,占用系统资源,降低数据维护速度
+		2、占用物理存储空间
+	4、索引示例
+		1、开启运行时间检测 ：set profiling=1;
+			备注 ：show variables like "profiling";
+		2、执行查询语句
+			select name from t1 where name="lucy99999";
+		3、查看执行时间
+			show profiles;
+		4、给name字段创建索引
+			create index name on t1(name);
+		5、执行查询语句
+			select name from t1 where name="lucy88888";
+		6、查看执行时间
+			show profiles;
+	5、索引类型
+		1、普通索引(index)
+			1、使用规则
+				1、可设置多个字段
+				2、约束 ：无
+				3、KEY标志 ：MUL
+			2、创建
+				1、创建表时
+					index(字段名),
+					index(字段名),
+				2、已有表
+					create index 索引名 on 表名(字段名);
+			3、查看
+				1、desc 表名;
+				2、show index from 表名\G;
+			4、删除
+				drop index 索引名 on 表名;
+		2、唯一索引(unique)
+			1、使用规则
+				1、可设置多个字段
+				2、约束 ：字段值不允许重复,允许为NULL
+				3、KEY标志 ：UNI
+			2、创建
+				1、创建表
+					unique(字段名),
+					unique(字段名)
+				2、已有表
+					create unique index 索引名 on 表名(字段名);
+			3、查看、删除同普通索引
+				Non_unique: 0 --> 唯一索引
+				Non_unique: 1 --> 普通索引
+		3、主键(primary key)&&自增长属性(auto_increment)
+			1、使用规则
+				1、只能有一个主键字段
+				2、约束 ：不允许重复,不能为NULL
+				3、KEY标志 ：PRI
+				4、通常设置记录编号字段 id 为主键,唯一锁定一条记录
+			2、创建
+				1、创建表时
+					id int primary key auto_increment,
+				2、已有表
+					alter table 表名 add primary key(字段名);
+			3、删除
+				1、删除自增长属性
+					alter table 表名 modify id int;
+				2、删除主键
+					alter table 表名 drop primary key;
+			
+					主键：primary key  
+						添加、删除 ：add/drop primary key..
+
+					自增长：auto_increment
+						添加、删除 ：modify id int;
+			4、指定自增长属性起始值
+				1、创建表
+					create table 表名(
+					id int primary key auto_increment,
+					... ...
+					)auto_increment=10000;
+				2、已有表
+					alter table 表名 auto_increment=10000;
+		4、外键(foreign key)
+2、数据导入
+	1、把文件系统内容导入到数据的表中
+	2、命令格式
+		load data infile "文件名"
+		into table 表名
+		fileds terminated by "分隔符"
+		lines terminated by "\n"
+	3、将scoretable.csv文件导入到db3库下的score表中
+		1、先把scoretable.csv文件拷贝到数据库的默认搜索路径中
+			1、查看搜索路径方法
+				show variables like "secure_file_priv";
+			2、执行复制命令
+				sudo cp /home/tarena/scoretable.csv /var/lib/mysql-files/
+		2、创建库、表(utf8字符集)
+			1、create database db3 character set utf8;
+			2、use db3;
+			3、
+				create table score(
+				id int,
+				name varchar(20),
+				score decimal(5,2),
+				phone char(11),
+				class char(7)
+				)character set utf8;
+		3、执行导入语句
+			load data infile "/var/lib/mysql-files/scoretable.csv"
+			into table score
+			fields terminated by ","
+			lines terminated by "\n";
+
+			注意：
+				1、库、表必须都为utf8编码
+				2、路径必须写绝对路径 /var/lib/mysql-files/..."
+		4、文件权限问题
+			rwx ：所有者对此文件权限
+			--- ：所属组其他用户对此文件权限
+			rw- ：其他组的用户对此文件权限
+			root ：所有者    
+			root ：所属组
+			
+			1、修改文件权限
+				chmod +rw scoretable.csv
+				chmod 666 scoretable.csv
+				r:4
+				w:2
+				x:1
+			步骤：
+				1、sudo -i
+				2、cd /var/lib/mysql-files
+				3、chmod 666 scoretable.csv
+	4、excel文件转为csv文件
+		打开excel表格 -> 文件 -> 另存为 -> *.csv(逗号分隔)
+	5、更改一个文件的字符编码
+		用 记事本/编辑器 打开,文件 -> 另存为 -> 选择编码
+3、数据导出
+	1、将数据库中表记录保存到系统文件里
+	2、语法格式
+		select ... from 表名
+		into outfile "文件名"
+		fields terminated by "分隔符"
+		lines terminated by "\n"
+	3、示例
+		1、把sanguo表中的姓名、攻击值、国家三个字段导出到文件 sanguo.csv中
+			select name,gongji,country from MOSHOU.sanguo
+			into outfile "/var/lib/mysql-files/sanguo.csv"
+			fields terminated by ","
+			lines terminated by "\n";
+		2、把mysql库下的user表中 user、host两个字段的值导出到 user.txt中,字段之间用 三个空格 去分隔
+			select user,host from mysql.user
+			into outfile "/var/lib/mysql-files/user.txt"
+			fields terminated by "   "
+			lines terminated by "\n";
+	4、注意
+		1、导出的内容完全由SQL查询语句决定
+		2、路径必须指定为数据库搜索的绝对路径
+4、表的复制
+	1、语法
+		create table 表名 select ... from 表名;
+	2、示例
+		1、复制sanguo表,sanguo2
+			create table MOSHOU.sanguo2 select * from MOSHOU.sanguo;
+		2、复制sanguo表的前3条记录,sanguo3
+			create table MOSHOU.sanguo3 select * from sanguo limit 3;
+		3、复制sanguo表的id、name和country三个字段的前5条记录,sanguo4
+			create table MOSHOU.sanguo4 select id,name,country from MOSHOU.sanguo limit 5;
+	3、只复制表结构
+		create table 表名 select * from 表名 where false;
+5、嵌套查询(子查询)
+	1、定义
+		把内层的查询结果作为外层的查询条件
+	2、select ... from 表名 where 字段名 运算符(select ....);
+	3、示例
+		1、把攻击值小于 平均攻击值 的名字和攻击值显示出来
+			分两步
+			select name,gongji from MOSHOU.sanguo 
+			where gongji<(select avg(gongji) from MOSHOU.sanguo);
+		2、找出每个国家攻击力最高的英雄名字和攻击值
+			逻辑错误：
+				select name,gongji from sanguo 
+				where gongji in
+				(select max(gongji) from sanguo group by country);
+			正确：
+				select name,gongji from sanguo
+				where (country,gongji) in 
+				(select country,max(gongji) from sanguo group by country);
+6、多表查询
+	1、两种方式
+		1、select 字段名列表 from 表1,表2; 笛卡尔积(不加where)
+	2、select 字段名列表 from 表1,表2 where 条件;
+		1、显示 省、市详细信息
+			select sheng.s_name,city.c_name from sheng,city
+			where sheng.s_id=city.cfather_id;
+		2、显示 省、市、县详细信息
+			select sheng.s_name,city.c_name,xian.x_name from sheng,city,xian
+			where sheng.s_id=city.cfather_id and city.c_id=xian.xfather_id;
+7、连接查询
+	1、内连接
+		1、语法格式
+			select ... from 表1 inner join 表2 on 条件;
+		2、示例
+			1、显示 省、市详细信息
+				select sheng.s_name,city.c_name from sheng 
+				inner join city on sheng.s_id=city.cfather_id;
+			2、显示 省、市、县详细信息
+				select sheng.s_name,city.c_name,xian.x_name from sheng inner join city 
+				on sheng.s_id=city.cfather_id 
+				inner join xian
+				on city.c_id=xian.xfather_id;
+	2、外连接
+		1、左连接
+			1、以左表为主显示查询结果
+			2、语法格式
+				select ... from 表1 left join 表2 on 条件;
+			3、示例
+				1、显示 省、市 详细信息,要求省全部显示
+					select sheng.s_name,city.c_name from sheng
+					left join city
+					on sheng.s_id=city.cfather_id;
+				2、显示 省、市、县 详细信息,要求 省 全部显示
+					select sheng.s_name,city.c_name,xian.x_name from
+					sheng left join city on sheng.s_id=city.cfather_id
+					left join xian on city.c_id=xian.xfather_id;
+				3、显示 省、市、县 详细信息,要求 市 全部显示(left、right)
+					select sheng.s_name,city.c_name,xian.x_name from
+					sheng right join city on sheng.s_id=city.cfather_id
+					left join xian on city.c_id=xian.xfather_id;
+		2、右连接
+作业：
+1、把 /ect/passwd 文件中内容导入到 db3库下的 userinfo表
+	tarena:x:1000:1000:tarena,,,:/home/tarena:/bin/bash
+	用户名:密码:UID号:GID号:用户描述:主目录:登录权限
+		
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
