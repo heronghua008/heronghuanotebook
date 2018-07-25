@@ -1,0 +1,2 @@
+Discover interesting projects and people to populate your personal news feed.
+Learn Git and GitHub without any code!
