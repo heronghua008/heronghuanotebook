@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>img标签</title>
+	<meta charset="utf-8">
+</head>
+<body>
+	<!-- 图片标签 <img src="路径">
+		url 组成 ： 协议 域名 目录路径 文件名
+	-->
+	<!-- <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1533033865081&di=44ec03b250fbed190dbe6abaa9478d67&imgtype=0&src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F01dc195951d604a8012193a3a885a2.jpg%401280w_1l_2o_100sh.jpg"/> -->
+	
+	<!--标签属性 width height 不适用所有元素  但是可以使用CSS调整-->
+	<h1 style="width:300px;height: 300px;">大标题</h1>
+
+	<p style="width:300px;height: 300px;">
+		url 组成 ： 协议 域名 目录路径 文件名
+	</p>
+
+	<span width="300px" height="300px">span 文本</span>
+	
+	<span style="width:300px;height: 300px;">css|设置宽高</span>
+	<p>
+		路径分为相对路径和绝对路径<br>
+		绝对路径 ：从根目录开始查找 <br>
+		注意 ： 1. 斜杠的问题 2. 目录与文件名称<br>
+		file：///协议是windows上打开本地文件的协议，类似于文件管理器
+	</p>
+	<img src="C:/Users/Administrator/Desktop/前端课程资料/img/northStar.jpg">
+	<img src="file:///C:/Users/Administrator/Desktop/前端课程资料/img/northStar.jpg">
+
+	<p width="300px" height="300px">
+		相对路径 ： 从当前文件所在的目录位置开始查找 
+		<br>
+		../ 表示从当前文件夹返回上一级目录
+
+	</p>
+	<img src="img/happy.gif" width="300px" height="300px">
+	<img src="img/images/huiyuan.jpg" width="300px" height="300px">
+	<img src="img/wxy.jpeg" width="300px" height="300px">
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

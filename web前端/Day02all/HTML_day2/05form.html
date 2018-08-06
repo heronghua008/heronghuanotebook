@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<!-- 表单元素 -->
+	<form action="xx.php" method="get">
+		<!-- 表单控件 -->
+		<!-- 1. 文本框与密码框 -->
+		<p>
+			用户名称：
+			<input type="text" name="uname" value="zhangsan" disabled>
+		</p>
+		<p>
+			用户密码：
+			<input type="password" name="upwd" placeholder="密码由6-12位数字组成">
+		</p>
+		<p>
+			用户性别：
+			<input type="radio" name="gender" value="male" checked>帅哥
+			<input type="radio" name="gender" value="female">美女
+		</p>
+		<p>
+			兴趣爱好：
+			<input type="checkbox" name="hobby" value="sing">唱歌
+			<input type="checkbox" name="hobby" value="dance">跳舞
+			<input type="checkbox" name="hobby" value="smoke">抽烟
+			<input type="checkbox" name="hobby" value="drink">喝酒
+			<input type="checkbox" name="hobby" value="perm">烫头
+		</p>
+		<!-- 隐藏域 用户不可见，用来隐式向服务器传递数据-->
+		<input type="hidden" name="uid" value="101">
+		
+		<!-- 文件上传 -->
+		<p>
+			用户头像：
+			<input type="file" name="uimg">
+		</p>
+		<p>
+			个人介绍：
+			<textarea name="uinfo" cols="50" rows="10" disabled></textarea>
+		</p>
+
+		<!-- 下拉菜单 -->
+		<p>
+			所在地区：
+			<select name="area">
+				<option value="bj">北京</option>
+				<option value="sh">上海</option>
+				<option value="gz">广州</option>
+				<option value="sz">深圳</option>
+			</select>
+			<select name="address">
+				<optgroup label="河北省">
+					<option value="sjz">石家庄</option>
+					<option value="bd">保定</option>
+				</optgroup>
+				<optgroup label="河南省">
+					<option value="zz">郑州</option>
+				</optgroup>
+			</select>
+		</p>
+		<p>
+			<input type="submit" name="submitBtn">
+			<input type="reset" name="resetBtn">
+			<!-- 普通按钮需要通过value属性设置显示文本 -->
+			<input type="button" name="agree" value="同意">
+		</p>
+
+		<p>
+			<button type="button">点我</button>
+			<button type="reset">重置</button>
+			<button type="submit">提交</button>
+		</p>
+
+	</form>
+</body>
+</html>

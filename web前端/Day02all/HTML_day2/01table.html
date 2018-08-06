@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>table</title>
+	<meta charset="utf-8">
+</head>
+<body>
+	<!-- 表格 ： 
+		边框属性 宽高尺寸
+		背景颜色bgcolor : 
+			1.使用颜色的英文名称表示
+			2.十六进制表示 每一位取值0-9 a-f 
+				#开头  每两位为一组代表一种三元色
+				共三组，六位表示
+
+		align : 设置表格在窗口中的水平显示位置
+		valign 不起作用		 
+	-->
+	<table border="1" width="500px" height="500px" bgcolor="pink" align="center" valign="middle">
+		<!-- tr ：table row 创建行 
+			align : 设置整行文本内容的水平对齐方式
+			valign ： 设置整行文本的垂直对其方式
+			用于td 是设置某一个单元格的水平和垂直对齐方式
+		-->
+		<tr>
+			<!-- 在行中创建单元格，用来存放数据 -->
+			<td align="center">鹿晗</td>
+			<td valign="top">关晓彤</td>
+			<td>纪凌尘</td>
+			<td>阚清子</td>
+			<td>迪丽热巴</td>
+		</tr>
+		<tr align="center" valign="bottom">
+			<td>鹿晗</td>
+			<td>关晓彤</td>
+			<td>纪凌尘</td>
+			<td>阚清子</td>
+			<td>迪丽热巴</td>
+		</tr>
+		<tr>
+			<td>鹿晗</td>
+			<td>关晓彤</td>
+			<td>纪凌尘</td>
+			<td>阚清子</td>
+			<td>迪丽热巴</td>
+		</tr>
+	</table>
+</body>
+</html>

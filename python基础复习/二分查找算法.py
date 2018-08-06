@@ -18,3 +18,10 @@ def find(n,l,aim,start = 0,end = None):
 
 ret= find(n,l,67)
 print(ret)
+print('蒋康雷是个GAY')
+
+from urllib import request
+
+
+list
+tuple
